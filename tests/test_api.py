@@ -78,3 +78,29 @@ def test_invalid_factor_rejected(client):
 
 def test_get_unknown_assessment_returns_404(client):
     assert client.get("/api/assessments/9999").status_code == 404
+
+
+def test_pdf_export(client):
+    resp = client.post(
+        "/api/assessments",
+        json={"title": "RI&E Magazijn", "department": "Logistiek"},
+    )
+    assessment_id = resp.json()["id"]
+    client.post(
+        f"/api/assessments/{assessment_id}/hazards",
+        json={
+            "description": "Vallen van hoogte",
+            "probability": 6,
+            "exposure": 6,
+            "effect": 15,
+        },
+    )
+
+    resp = client.get(f"/assessments/{assessment_id}/pdf")
+    assert resp.status_code == 200
+    assert resp.headers["content-type"] == "application/pdf"
+    assert resp.content.startswith(b"%PDF")
+
+
+def test_pdf_export_unknown_returns_404(client):
+    assert client.get("/assessments/9999/pdf").status_code == 404

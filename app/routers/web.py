@@ -2,15 +2,24 @@
 
 from pathlib import Path
 
+import re
+
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app import crud
 from app.database import get_db
+from app.pdf import build_assessment_pdf
 from app.schemas import AssessmentCreate, HazardCreate
 from app.scoring import EFFECT_VALUES, EXPOSURE_VALUES, PROBABILITY_VALUES
+
+
+def _safe_filename(name: str) -> str:
+    """Maak een veilige bestandsnaam van een vrije tekst."""
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "_", name).strip("_")
+    return slug or "rie"
 
 router = APIRouter(tags=["web"])
 
@@ -59,6 +68,23 @@ def assessment_detail(
             "exposure_values": EXPOSURE_VALUES,
             "effect_values": EFFECT_VALUES,
         },
+    )
+
+
+@router.get("/assessments/{assessment_id}/pdf")
+def assessment_pdf(
+    assessment_id: int, db: Session = Depends(get_db)
+) -> Response:
+    """Exporteer een RI&E als PDF-bestand."""
+    assessment = crud.rie.get_assessment(db, assessment_id)
+    if assessment is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "RI&E niet gevonden")
+    pdf_bytes = build_assessment_pdf(assessment)
+    filename = f"RIE_{_safe_filename(assessment.title)}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
