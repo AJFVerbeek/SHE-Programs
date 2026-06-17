@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models import Assessment, Hazard
-from app.schemas import AssessmentCreate, HazardCreate
+from app.schemas import AssessmentCreate, AssessmentUpdate, HazardCreate
 
 
 def list_assessments(db: Session) -> list[Assessment]:
@@ -21,6 +21,17 @@ def create_assessment(db: Session, data: AssessmentCreate) -> Assessment:
     """Maak een nieuwe RI&E aan."""
     assessment = Assessment(title=data.title, department=data.department)
     db.add(assessment)
+    db.commit()
+    db.refresh(assessment)
+    return assessment
+
+
+def update_assessment(
+    db: Session, assessment: Assessment, data: AssessmentUpdate
+) -> Assessment:
+    """Wijzig de titel en afdeling van een RI&E."""
+    assessment.title = data.title
+    assessment.department = data.department
     db.commit()
     db.refresh(assessment)
     return assessment

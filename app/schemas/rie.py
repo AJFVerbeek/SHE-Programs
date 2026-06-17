@@ -63,6 +63,13 @@ class AssessmentCreate(BaseModel):
     department: str = Field(min_length=1, max_length=200)
 
 
+class AssessmentUpdate(BaseModel):
+    """Invoer voor het wijzigen van een RI&E (titel/afdeling)."""
+
+    title: str = Field(min_length=1, max_length=200)
+    department: str = Field(min_length=1, max_length=200)
+
+
 class AssessmentRead(BaseModel):
     """Uitvoer van een RI&E zonder gevaren."""
 

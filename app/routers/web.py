@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app import crud
 from app.database import get_db
 from app.pdf import build_assessment_pdf
-from app.schemas import AssessmentCreate, HazardCreate
+from app.schemas import AssessmentCreate, AssessmentUpdate, HazardCreate
 from app.scoring import EFFECT_VALUES, EXPOSURE_VALUES, PROBABILITY_VALUES
 
 
@@ -68,6 +68,25 @@ def assessment_detail(
             "exposure_values": EXPOSURE_VALUES,
             "effect_values": EFFECT_VALUES,
         },
+    )
+
+
+@router.post("/assessments/{assessment_id}/rename")
+def rename_assessment_form(
+    assessment_id: int,
+    title: str = Form(...),
+    department: str = Form(...),
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    """Hernoem een RI&E (titel/afdeling) vanuit het formulier."""
+    assessment = crud.rie.get_assessment(db, assessment_id)
+    if assessment is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "RI&E niet gevonden")
+    crud.rie.update_assessment(
+        db, assessment, AssessmentUpdate(title=title, department=department)
+    )
+    return RedirectResponse(
+        f"/assessments/{assessment_id}", status_code=status.HTTP_303_SEE_OTHER
     )
 
 

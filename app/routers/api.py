@@ -9,6 +9,7 @@ from app.schemas import (
     AssessmentCreate,
     AssessmentDetail,
     AssessmentRead,
+    AssessmentUpdate,
     HazardCreate,
     HazardRead,
 )
@@ -41,6 +42,17 @@ def get_assessment(assessment_id: int, db: Session = Depends(get_db)) -> object:
     if assessment is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "RI&E niet gevonden")
     return assessment
+
+
+@router.patch("/assessments/{assessment_id}", response_model=AssessmentDetail)
+def update_assessment(
+    assessment_id: int, data: AssessmentUpdate, db: Session = Depends(get_db)
+) -> object:
+    """Wijzig de titel/afdeling van een RI&E."""
+    assessment = crud.rie.get_assessment(db, assessment_id)
+    if assessment is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "RI&E niet gevonden")
+    return crud.rie.update_assessment(db, assessment, data)
 
 
 @router.delete(

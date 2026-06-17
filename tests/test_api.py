@@ -80,6 +80,35 @@ def test_get_unknown_assessment_returns_404(client):
     assert client.get("/api/assessments/9999").status_code == 404
 
 
+def test_rename_assessment(client):
+    resp = client.post(
+        "/api/assessments",
+        json={"title": "Oude titel", "department": "Logistiek"},
+    )
+    assessment_id = resp.json()["id"]
+
+    resp = client.patch(
+        f"/api/assessments/{assessment_id}",
+        json={"title": "Nieuwe titel", "department": "Productie"},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["title"] == "Nieuwe titel"
+    assert body["department"] == "Productie"
+
+    # Wijziging is opgeslagen.
+    resp = client.get(f"/api/assessments/{assessment_id}")
+    assert resp.json()["title"] == "Nieuwe titel"
+
+
+def test_rename_unknown_assessment_returns_404(client):
+    resp = client.patch(
+        "/api/assessments/9999",
+        json={"title": "X", "department": "Y"},
+    )
+    assert resp.status_code == 404
+
+
 def test_pdf_export(client):
     resp = client.post(
         "/api/assessments",

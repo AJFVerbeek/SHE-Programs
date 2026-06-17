@@ -4,6 +4,7 @@ from app.schemas.rie import (
     AssessmentCreate,
     AssessmentDetail,
     AssessmentRead,
+    AssessmentUpdate,
     HazardCreate,
     HazardRead,
 )
@@ -12,6 +13,7 @@ __all__ = [
     "AssessmentCreate",
     "AssessmentDetail",
     "AssessmentRead",
+    "AssessmentUpdate",
     "HazardCreate",
     "HazardRead",
 ]

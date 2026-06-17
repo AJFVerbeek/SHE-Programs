@@ -6,6 +6,21 @@
 <p class="muted">Afdeling/locatie: {{ assessment.department }}</p>
 <p><a class="button-link" href="/assessments/{{ assessment.id }}/pdf">&#128196; Exporteer als PDF</a></p>
 
+<details class="card">
+    <summary>RI&amp;E hernoemen</summary>
+    <form method="post" action="/assessments/{{ assessment.id }}/rename" class="stack">
+        <label>Titel
+            <input type="text" name="title" required maxlength="200"
+                   value="{{ assessment.title }}">
+        </label>
+        <label>Afdeling / locatie
+            <input type="text" name="department" required maxlength="200"
+                   value="{{ assessment.department }}">
+        </label>
+        <button type="submit">Opslaan</button>
+    </form>
+</details>
+
 <section class="card">
     <h2>Geinventariseerde gevaren</h2>
     {% if assessment.hazards %}
