@@ -133,3 +133,88 @@ def test_pdf_export(client):
 
 def test_pdf_export_unknown_returns_404(client):
     assert client.get("/assessments/9999/pdf").status_code == 404
+
+
+def _create_hazard(client, **overrides):
+    """Hulpfunctie: maak een RI&E met een gevaar en geef (assessment_id, hazard)."""
+    assessment_id = client.post(
+        "/api/assessments", json={"title": "T", "department": "D"}
+    ).json()["id"]
+    payload = {
+        "description": "Vallen van hoogte",
+        "probability": 6,
+        "exposure": 6,
+        "effect": 15,
+    }
+    payload.update(overrides)
+    hazard = client.post(
+        f"/api/assessments/{assessment_id}/hazards", json=payload
+    ).json()
+    return assessment_id, hazard
+
+
+def test_residual_risk_calculated(client):
+    _, hazard = _create_hazard(
+        client,
+        residual_probability=3,
+        residual_exposure=6,
+        residual_effect=3,
+    )
+    assert hazard["residual_risk_score"] == 54
+    assert hazard["residual_risk_label"] == "Mogelijk"
+
+
+def test_residual_risk_optional(client):
+    _, hazard = _create_hazard(client)
+    assert hazard["residual_risk_score"] is None
+    assert hazard["residual_risk_label"] is None
+
+
+def test_residual_must_be_complete(client):
+    assessment_id = client.post(
+        "/api/assessments", json={"title": "T", "department": "D"}
+    ).json()["id"]
+    resp = client.post(
+        f"/api/assessments/{assessment_id}/hazards",
+        json={
+            "description": "Onvolledig restrisico",
+            "probability": 6,
+            "exposure": 6,
+            "effect": 15,
+            "residual_probability": 3,  # B en E ontbreken
+        },
+    )
+    assert resp.status_code == 422
+
+
+def test_update_hazard(client):
+    _, hazard = _create_hazard(client)
+    resp = client.patch(
+        f"/api/hazards/{hazard['id']}",
+        json={
+            "description": "Aangepast gevaar",
+            "probability": 1,
+            "exposure": 1,
+            "effect": 3,
+        },
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["description"] == "Aangepast gevaar"
+    assert body["risk_score"] == 3
+
+
+def test_delete_hazard(client):
+    assessment_id, hazard = _create_hazard(client)
+    assert client.delete(f"/api/hazards/{hazard['id']}").status_code == 204
+
+    detail = client.get(f"/api/assessments/{assessment_id}").json()
+    assert detail["hazards"] == []
+
+
+def test_update_unknown_hazard_returns_404(client):
+    resp = client.patch(
+        "/api/hazards/9999",
+        json={"description": "X", "probability": 1, "exposure": 1, "effect": 3},
+    )
+    assert resp.status_code == 404

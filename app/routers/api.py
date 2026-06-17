@@ -82,3 +82,23 @@ def add_hazard(
         return crud.rie.add_hazard(db, assessment, data)
     except ValueError as exc:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc))
+
+
+@router.patch("/hazards/{hazard_id}", response_model=HazardRead)
+def update_hazard(
+    hazard_id: int, data: HazardCreate, db: Session = Depends(get_db)
+) -> object:
+    """Wijzig een gevaar (inclusief restrisico)."""
+    hazard = crud.rie.get_hazard(db, hazard_id)
+    if hazard is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Gevaar niet gevonden")
+    return crud.rie.update_hazard(db, hazard, data)
+
+
+@router.delete("/hazards/{hazard_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_hazard(hazard_id: int, db: Session = Depends(get_db)) -> None:
+    """Verwijder een gevaar."""
+    hazard = crud.rie.get_hazard(db, hazard_id)
+    if hazard is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Gevaar niet gevonden")
+    crud.rie.delete_hazard(db, hazard)

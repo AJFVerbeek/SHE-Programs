@@ -2,13 +2,20 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.scoring import EFFECT_VALUES, EXPOSURE_VALUES, PROBABILITY_VALUES
 
 
+def _in_scale(value: float | None, allowed: tuple[float, ...], name: str) -> float | None:
+    """Valideer een (optionele) factor tegen de toegestane Fine & Kinney-schaal."""
+    if value is not None and value not in allowed:
+        raise ValueError(f"{name} moet een van {allowed} zijn")
+    return value
+
+
 class HazardCreate(BaseModel):
-    """Invoer voor het aanmaken van een gevaar."""
+    """Invoer voor het aanmaken of wijzigen van een gevaar."""
 
     description: str = Field(min_length=1, max_length=2000)
     category: str | None = Field(default=None, max_length=100)
@@ -17,26 +24,53 @@ class HazardCreate(BaseModel):
     effect: float = Field(description=f"Effect, een van {EFFECT_VALUES}")
     control_measure: str | None = Field(default=None, max_length=2000)
 
+    # Restrisico na maatregel (optioneel, maar alles-of-niets).
+    residual_probability: float | None = Field(default=None)
+    residual_exposure: float | None = Field(default=None)
+    residual_effect: float | None = Field(default=None)
+
     @field_validator("probability")
     @classmethod
     def _check_probability(cls, v: float) -> float:
-        if v not in PROBABILITY_VALUES:
-            raise ValueError(f"Waarschijnlijkheid moet een van {PROBABILITY_VALUES} zijn")
-        return v
+        return _in_scale(v, PROBABILITY_VALUES, "Waarschijnlijkheid")
 
     @field_validator("exposure")
     @classmethod
     def _check_exposure(cls, v: float) -> float:
-        if v not in EXPOSURE_VALUES:
-            raise ValueError(f"Blootstelling moet een van {EXPOSURE_VALUES} zijn")
-        return v
+        return _in_scale(v, EXPOSURE_VALUES, "Blootstelling")
 
     @field_validator("effect")
     @classmethod
     def _check_effect(cls, v: float) -> float:
-        if v not in EFFECT_VALUES:
-            raise ValueError(f"Effect moet een van {EFFECT_VALUES} zijn")
-        return v
+        return _in_scale(v, EFFECT_VALUES, "Effect")
+
+    @field_validator("residual_probability")
+    @classmethod
+    def _check_res_probability(cls, v: float | None) -> float | None:
+        return _in_scale(v, PROBABILITY_VALUES, "Rest-waarschijnlijkheid")
+
+    @field_validator("residual_exposure")
+    @classmethod
+    def _check_res_exposure(cls, v: float | None) -> float | None:
+        return _in_scale(v, EXPOSURE_VALUES, "Rest-blootstelling")
+
+    @field_validator("residual_effect")
+    @classmethod
+    def _check_res_effect(cls, v: float | None) -> float | None:
+        return _in_scale(v, EFFECT_VALUES, "Rest-effect")
+
+    @model_validator(mode="after")
+    def _check_residual_complete(self) -> "HazardCreate":
+        residual = (
+            self.residual_probability,
+            self.residual_exposure,
+            self.residual_effect,
+        )
+        if any(v is not None for v in residual) and any(v is None for v in residual):
+            raise ValueError(
+                "Restrisico moet volledig zijn (W, B en E) of helemaal leeg blijven"
+            )
+        return self
 
 
 class HazardRead(BaseModel):
@@ -54,6 +88,11 @@ class HazardRead(BaseModel):
     risk_score: float
     risk_label: str
     risk_action: str
+    residual_probability: float | None
+    residual_exposure: float | None
+    residual_effect: float | None
+    residual_risk_score: float | None
+    residual_risk_label: str | None
 
 
 class AssessmentCreate(BaseModel):

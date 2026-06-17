@@ -30,6 +30,7 @@
                 <th>Gevaar</th><th>Categorie</th>
                 <th>W</th><th>B</th><th>E</th>
                 <th>Risico</th><th>Klasse</th><th>Beheersmaatregel</th>
+                <th>Restrisico</th><th>Rest-klasse</th><th>Acties</th>
             </tr>
         </thead>
         <tbody>
@@ -43,6 +44,15 @@
                 <td><strong>{{ h.risk_score }}</strong></td>
                 <td><span class="badge badge-{{ h.risk_label | lower | replace(' ', '-') }}">{{ h.risk_label }}</span></td>
                 <td>{{ h.control_measure or "-" }}</td>
+                <td>{% if h.residual_risk_score is not none %}<strong>{{ h.residual_risk_score }}</strong>{% else %}-{% endif %}</td>
+                <td>{% if h.residual_risk_label %}<span class="badge badge-{{ h.residual_risk_label | lower | replace(' ', '-') }}">{{ h.residual_risk_label }}</span>{% else %}-{% endif %}</td>
+                <td class="actions">
+                    <a href="/hazards/{{ h.id }}/edit">Bewerken</a>
+                    <form method="post" action="/hazards/{{ h.id }}/delete"
+                          onsubmit="return confirm('Dit gevaar verwijderen?');">
+                        <button type="submit" class="link-danger">Verwijderen</button>
+                    </form>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
@@ -82,6 +92,30 @@
         <label>Beheersmaatregel (optioneel)
             <input type="text" name="control_measure" maxlength="2000">
         </label>
+        <details>
+            <summary>Restrisico na maatregel (optioneel)</summary>
+            <div class="grid-3">
+                <label>Rest-W
+                    <select name="residual_probability">
+                        <option value="">&ndash;</option>
+                        {% for v in probability_values %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                    </select>
+                </label>
+                <label>Rest-B
+                    <select name="residual_exposure">
+                        <option value="">&ndash;</option>
+                        {% for v in exposure_values %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                    </select>
+                </label>
+                <label>Rest-E
+                    <select name="residual_effect">
+                        <option value="">&ndash;</option>
+                        {% for v in effect_values %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                    </select>
+                </label>
+            </div>
+            <p class="muted"><small>Vul W, B en E volledig in, of laat alle drie leeg.</small></p>
+        </details>
         <button type="submit">Gevaar toevoegen</button>
     </form>
     <p class="muted"><small>Risico = W &times; B &times; E (Fine &amp; Kinney)</small></p>

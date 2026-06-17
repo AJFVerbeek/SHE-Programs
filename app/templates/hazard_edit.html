@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Gevaar bewerken{% endblock %}
+{% block content %}
+<p><a href="/assessments/{{ hazard.assessment_id }}">&larr; Terug naar RI&amp;E</a></p>
+<h1>Gevaar bewerken</h1>
+
+<section class="card">
+    <form method="post" action="/hazards/{{ hazard.id }}/edit" class="stack">
+        <label>Omschrijving gevaar
+            <input type="text" name="description" required maxlength="2000"
+                   value="{{ hazard.description }}">
+        </label>
+        <label>Categorie (optioneel)
+            <input type="text" name="category" maxlength="100"
+                   value="{{ hazard.category or '' }}">
+        </label>
+        <div class="grid-3">
+            <label>Waarschijnlijkheid (W)
+                <select name="probability" required>
+                    {% for v in probability_values %}
+                    <option value="{{ v }}" {% if v == hazard.probability %}selected{% endif %}>{{ v }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Blootstelling (B)
+                <select name="exposure" required>
+                    {% for v in exposure_values %}
+                    <option value="{{ v }}" {% if v == hazard.exposure %}selected{% endif %}>{{ v }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Effect (E)
+                <select name="effect" required>
+                    {% for v in effect_values %}
+                    <option value="{{ v }}" {% if v == hazard.effect %}selected{% endif %}>{{ v }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+        <label>Beheersmaatregel (optioneel)
+            <input type="text" name="control_measure" maxlength="2000"
+                   value="{{ hazard.control_measure or '' }}">
+        </label>
+        <details {% if hazard.has_residual %}open{% endif %}>
+            <summary>Restrisico na maatregel (optioneel)</summary>
+            <div class="grid-3">
+                <label>Rest-W
+                    <select name="residual_probability">
+                        <option value="">&ndash;</option>
+                        {% for v in probability_values %}
+                        <option value="{{ v }}" {% if v == hazard.residual_probability %}selected{% endif %}>{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Rest-B
+                    <select name="residual_exposure">
+                        <option value="">&ndash;</option>
+                        {% for v in exposure_values %}
+                        <option value="{{ v }}" {% if v == hazard.residual_exposure %}selected{% endif %}>{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Rest-E
+                    <select name="residual_effect">
+                        <option value="">&ndash;</option>
+                        {% for v in effect_values %}
+                        <option value="{{ v }}" {% if v == hazard.residual_effect %}selected{% endif %}>{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <p class="muted"><small>Vul W, B en E volledig in, of laat alle drie leeg.</small></p>
+        </details>
+        <button type="submit">Wijzigingen opslaan</button>
+    </form>
+</section>
+{% endblock %}

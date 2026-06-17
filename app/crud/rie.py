@@ -57,8 +57,32 @@ def add_hazard(db: Session, assessment: Assessment, data: HazardCreate) -> Hazar
         exposure=data.exposure,
         effect=data.effect,
         control_measure=data.control_measure,
+        residual_probability=data.residual_probability,
+        residual_exposure=data.residual_exposure,
+        residual_effect=data.residual_effect,
     )
     db.add(hazard)
+    db.commit()
+    db.refresh(hazard)
+    return hazard
+
+
+def get_hazard(db: Session, hazard_id: int) -> Hazard | None:
+    """Haal een enkel gevaar op, of None als het niet bestaat."""
+    return db.get(Hazard, hazard_id)
+
+
+def update_hazard(db: Session, hazard: Hazard, data: HazardCreate) -> Hazard:
+    """Wijzig alle velden van een gevaar (inclusief restrisico)."""
+    hazard.description = data.description
+    hazard.category = data.category
+    hazard.probability = data.probability
+    hazard.exposure = data.exposure
+    hazard.effect = data.effect
+    hazard.control_measure = data.control_measure
+    hazard.residual_probability = data.residual_probability
+    hazard.residual_exposure = data.residual_exposure
+    hazard.residual_effect = data.residual_effect
     db.commit()
     db.refresh(hazard)
     return hazard

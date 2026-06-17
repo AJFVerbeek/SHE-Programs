@@ -29,7 +29,10 @@ _RISK_COLORS: dict[str, colors.Color] = {
     "Zeer hoog": colors.HexColor("#7b1d1d"),
 }
 
-_HEADER = ["Gevaar", "Categorie", "W", "B", "E", "Risico", "Klasse", "Beheersmaatregel"]
+_HEADER = [
+    "Gevaar", "Categorie", "W", "B", "E", "Risico", "Klasse",
+    "Beheersmaatregel", "Restrisico", "Rest-klasse",
+]
 
 
 def build_assessment_pdf(assessment: Assessment) -> bytes:
@@ -71,6 +74,11 @@ def build_assessment_pdf(assessment: Assessment) -> bytes:
 
     if assessment.hazards:
         for row_index, h in enumerate(assessment.hazards, start=1):
+            residual_score = (
+                f"<b>{h.residual_risk_score}</b>"
+                if h.residual_risk_score is not None
+                else "-"
+            )
             data.append(
                 [
                     Paragraph(h.description, cell),
@@ -81,15 +89,25 @@ def build_assessment_pdf(assessment: Assessment) -> bytes:
                     Paragraph(f"<b>{h.risk_score}</b>", cell_center),
                     Paragraph(h.risk_label, cell_center),
                     Paragraph(h.control_measure or "-", cell),
+                    Paragraph(residual_score, cell_center),
+                    Paragraph(h.residual_risk_label or "-", cell_center),
                 ]
             )
+            # Kleur de (rest)klasse-cel op basis van de risicoklasse.
             color = _RISK_COLORS.get(h.risk_label, colors.grey)
             risk_row_styles.append(("BACKGROUND", (6, row_index), (6, row_index), color))
             risk_row_styles.append(("TEXTCOLOR", (6, row_index), (6, row_index), colors.white))
+            if h.residual_risk_label:
+                res_color = _RISK_COLORS.get(h.residual_risk_label, colors.grey)
+                risk_row_styles.append(("BACKGROUND", (9, row_index), (9, row_index), res_color))
+                risk_row_styles.append(("TEXTCOLOR", (9, row_index), (9, row_index), colors.white))
     else:
-        data.append([Paragraph("Nog geen gevaren geinventariseerd.", cell)] + [""] * 7)
+        data.append([Paragraph("Nog geen gevaren geinventariseerd.", cell)] + [""] * 9)
 
-    col_widths = [60 * mm, 28 * mm, 12 * mm, 12 * mm, 12 * mm, 18 * mm, 26 * mm, 80 * mm]
+    col_widths = [
+        50 * mm, 24 * mm, 10 * mm, 10 * mm, 10 * mm, 16 * mm, 22 * mm,
+        55 * mm, 16 * mm, 22 * mm,
+    ]
     table = Table(data, colWidths=col_widths, repeatRows=1)
     table.setStyle(
         TableStyle(

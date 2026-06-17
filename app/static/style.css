@@ -110,3 +110,16 @@ a { color: var(--accent); }
 .badge-substantieel { background: #c05621; }
 .badge-hoog { background: #c53030; }
 .badge-zeer-hoog { background: #7b1d1d; }
+
+.actions { white-space: nowrap; }
+.actions form { display: inline; margin: 0; }
+.link-danger {
+    background: none;
+    border: 0;
+    color: #c53030;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.5rem;
+    font: inherit;
+    text-decoration: underline;
+}

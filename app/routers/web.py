@@ -107,6 +107,37 @@ def assessment_pdf(
     )
 
 
+def _optional_float(value: str) -> float | None:
+    """Zet een (mogelijk lege) form-waarde om naar een float of None."""
+    value = value.strip()
+    return float(value) if value else None
+
+
+def _hazard_from_form(
+    description: str,
+    category: str,
+    probability: float,
+    exposure: float,
+    effect: float,
+    control_measure: str,
+    residual_probability: str,
+    residual_exposure: str,
+    residual_effect: str,
+) -> HazardCreate:
+    """Bouw een gevalideerd HazardCreate-schema uit ruwe form-waarden."""
+    return HazardCreate(
+        description=description,
+        category=category or None,
+        probability=probability,
+        exposure=exposure,
+        effect=effect,
+        control_measure=control_measure or None,
+        residual_probability=_optional_float(residual_probability),
+        residual_exposure=_optional_float(residual_exposure),
+        residual_effect=_optional_float(residual_effect),
+    )
+
+
 @router.post("/assessments/{assessment_id}/hazards")
 def add_hazard_form(
     assessment_id: int,
@@ -116,6 +147,9 @@ def add_hazard_form(
     exposure: float = Form(...),
     effect: float = Form(...),
     control_measure: str = Form(""),
+    residual_probability: str = Form(""),
+    residual_exposure: str = Form(""),
+    residual_effect: str = Form(""),
     db: Session = Depends(get_db),
 ) -> RedirectResponse:
     """Voeg een gevaar toe vanuit het formulier."""
@@ -125,15 +159,79 @@ def add_hazard_form(
     crud.rie.add_hazard(
         db,
         assessment,
-        HazardCreate(
-            description=description,
-            category=category or None,
-            probability=probability,
-            exposure=exposure,
-            effect=effect,
-            control_measure=control_measure or None,
+        _hazard_from_form(
+            description, category, probability, exposure, effect,
+            control_measure, residual_probability, residual_exposure,
+            residual_effect,
         ),
     )
+    return RedirectResponse(
+        f"/assessments/{assessment_id}", status_code=status.HTTP_303_SEE_OTHER
+    )
+
+
+@router.get("/hazards/{hazard_id}/edit", response_class=HTMLResponse)
+def edit_hazard_page(
+    hazard_id: int, request: Request, db: Session = Depends(get_db)
+) -> HTMLResponse:
+    """Bewerkpagina voor een gevaar."""
+    hazard = crud.rie.get_hazard(db, hazard_id)
+    if hazard is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Gevaar niet gevonden")
+    return templates.TemplateResponse(
+        request,
+        "hazard_edit.html",
+        {
+            "hazard": hazard,
+            "probability_values": PROBABILITY_VALUES,
+            "exposure_values": EXPOSURE_VALUES,
+            "effect_values": EFFECT_VALUES,
+        },
+    )
+
+
+@router.post("/hazards/{hazard_id}/edit")
+def edit_hazard_form(
+    hazard_id: int,
+    description: str = Form(...),
+    category: str = Form(""),
+    probability: float = Form(...),
+    exposure: float = Form(...),
+    effect: float = Form(...),
+    control_measure: str = Form(""),
+    residual_probability: str = Form(""),
+    residual_exposure: str = Form(""),
+    residual_effect: str = Form(""),
+    db: Session = Depends(get_db),
+) -> RedirectResponse:
+    """Sla wijzigingen aan een gevaar op."""
+    hazard = crud.rie.get_hazard(db, hazard_id)
+    if hazard is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Gevaar niet gevonden")
+    crud.rie.update_hazard(
+        db,
+        hazard,
+        _hazard_from_form(
+            description, category, probability, exposure, effect,
+            control_measure, residual_probability, residual_exposure,
+            residual_effect,
+        ),
+    )
+    return RedirectResponse(
+        f"/assessments/{hazard.assessment_id}", status_code=status.HTTP_303_SEE_OTHER
+    )
+
+
+@router.post("/hazards/{hazard_id}/delete")
+def delete_hazard_form(
+    hazard_id: int, db: Session = Depends(get_db)
+) -> RedirectResponse:
+    """Verwijder een gevaar vanuit de webinterface."""
+    hazard = crud.rie.get_hazard(db, hazard_id)
+    if hazard is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Gevaar niet gevonden")
+    assessment_id = hazard.assessment_id
+    crud.rie.delete_hazard(db, hazard)
     return RedirectResponse(
         f"/assessments/{assessment_id}", status_code=status.HTTP_303_SEE_OTHER
     )

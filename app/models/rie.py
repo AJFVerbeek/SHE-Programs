@@ -47,6 +47,12 @@ class Hazard(Base):
 
     control_measure: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+    # Restrisico: herbeoordeling na het treffen van de beheersmaatregel.
+    # Optioneel; alleen ingevuld wanneer een herbeoordeling is gedaan.
+    residual_probability: Mapped[float | None] = mapped_column(Float, nullable=True)
+    residual_exposure: Mapped[float | None] = mapped_column(Float, nullable=True)
+    residual_effect: Mapped[float | None] = mapped_column(Float, nullable=True)
+
     assessment: Mapped["Assessment"] = relationship(back_populates="hazards")
 
     @property
@@ -63,3 +69,29 @@ class Hazard(Base):
     def risk_action(self) -> str:
         """De geadviseerde actie horend bij de risicoklasse."""
         return classify_risk(self.risk_score).action
+
+    @property
+    def has_residual(self) -> bool:
+        """Of er een volledige restrisico-herbeoordeling beschikbaar is."""
+        return None not in (
+            self.residual_probability,
+            self.residual_exposure,
+            self.residual_effect,
+        )
+
+    @property
+    def residual_risk_score(self) -> float | None:
+        """Het restrisicogetal na maatregel, of None als niet beoordeeld."""
+        if not self.has_residual:
+            return None
+        return calculate_risk_score(
+            self.residual_probability,
+            self.residual_exposure,
+            self.residual_effect,
+        )
+
+    @property
+    def residual_risk_label(self) -> str | None:
+        """De restrisicoklasse na maatregel, of None als niet beoordeeld."""
+        score = self.residual_risk_score
+        return classify_risk(score).label if score is not None else None
