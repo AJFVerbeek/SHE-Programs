@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}RI&E-overzicht{% endblock %}
+{% block content %}
+<h1>RI&amp;E-overzicht</h1>
+
+<section class="card">
+    <h2>Nieuwe RI&amp;E</h2>
+    <form method="post" action="/assessments" class="stack">
+        <label>Titel
+            <input type="text" name="title" required maxlength="200"
+                   placeholder="Bijv. RI&E Magazijn 2026">
+        </label>
+        <label>Afdeling / locatie
+            <input type="text" name="department" required maxlength="200"
+                   placeholder="Bijv. Logistiek">
+        </label>
+        <button type="submit">Aanmaken</button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Bestaande RI&amp;E's</h2>
+    {% if assessments %}
+    <table>
+        <thead>
+            <tr><th>Titel</th><th>Afdeling</th><th>Aangemaakt</th></tr>
+        </thead>
+        <tbody>
+        {% for a in assessments %}
+            <tr>
+                <td><a href="/assessments/{{ a.id }}">{{ a.title }}</a></td>
+                <td>{{ a.department }}</td>
+                <td>{{ a.created_at.strftime("%d-%m-%Y") }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="muted">Nog geen RI&amp;E's. Maak er hierboven een aan.</p>
+    {% endif %}
+</section>
+{% endblock %}

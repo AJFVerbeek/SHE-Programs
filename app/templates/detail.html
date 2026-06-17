@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ assessment.title }}{% endblock %}
+{% block content %}
+<p><a href="/">&larr; Terug naar overzicht</a></p>
+<h1>{{ assessment.title }}</h1>
+<p class="muted">Afdeling/locatie: {{ assessment.department }}</p>
+
+<section class="card">
+    <h2>Geinventariseerde gevaren</h2>
+    {% if assessment.hazards %}
+    <table>
+        <thead>
+            <tr>
+                <th>Gevaar</th><th>Categorie</th>
+                <th>W</th><th>B</th><th>E</th>
+                <th>Risico</th><th>Klasse</th><th>Beheersmaatregel</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for h in assessment.hazards %}
+            <tr>
+                <td>{{ h.description }}</td>
+                <td>{{ h.category or "-" }}</td>
+                <td>{{ h.probability }}</td>
+                <td>{{ h.exposure }}</td>
+                <td>{{ h.effect }}</td>
+                <td><strong>{{ h.risk_score }}</strong></td>
+                <td><span class="badge badge-{{ h.risk_label | lower | replace(' ', '-') }}">{{ h.risk_label }}</span></td>
+                <td>{{ h.control_measure or "-" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="muted">Nog geen gevaren toegevoegd.</p>
+    {% endif %}
+</section>
+
+<section class="card">
+    <h2>Gevaar toevoegen</h2>
+    <form method="post" action="/assessments/{{ assessment.id }}/hazards" class="stack">
+        <label>Omschrijving gevaar
+            <input type="text" name="description" required maxlength="2000">
+        </label>
+        <label>Categorie (optioneel)
+            <input type="text" name="category" maxlength="100"
+                   placeholder="Bijv. Fysiek, Chemisch, Ergonomisch">
+        </label>
+        <div class="grid-3">
+            <label>Waarschijnlijkheid (W)
+                <select name="probability" required>
+                    {% for v in probability_values %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+            </label>
+            <label>Blootstelling (B)
+                <select name="exposure" required>
+                    {% for v in exposure_values %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+            </label>
+            <label>Effect (E)
+                <select name="effect" required>
+                    {% for v in effect_values %}<option value="{{ v }}">{{ v }}</option>{% endfor %}
+                </select>
+            </label>
+        </div>
+        <label>Beheersmaatregel (optioneel)
+            <input type="text" name="control_measure" maxlength="2000">
+        </label>
+        <button type="submit">Gevaar toevoegen</button>
+    </form>
+    <p class="muted"><small>Risico = W &times; B &times; E (Fine &amp; Kinney)</small></p>
+</section>
+{% endblock %}

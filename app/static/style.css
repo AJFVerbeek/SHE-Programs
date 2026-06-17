@@ -1,0 +1,101 @@
+:root {
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --ink: #1f2933;
+    --muted: #6b7280;
+    --accent: #1d6f42;
+    --border: #e2e8f0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+}
+
+header {
+    background: var(--accent);
+    padding: 1rem 1.5rem;
+}
+
+header .brand {
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 1.1rem;
+}
+
+main {
+    max-width: 960px;
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+}
+
+footer {
+    text-align: center;
+    color: var(--muted);
+    padding: 2rem 1rem;
+}
+
+h1 { margin-top: 0; }
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.stack { display: flex; flex-direction: column; gap: 0.75rem; }
+.stack label { display: flex; flex-direction: column; gap: 0.25rem; font-weight: 600; }
+
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+@media (max-width: 600px) { .grid-3 { grid-template-columns: 1fr; } }
+
+input, select {
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 400;
+}
+
+button {
+    align-self: flex-start;
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+button:hover { filter: brightness(1.05); }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-size: 0.85rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+
+a { color: var(--accent); }
+.muted { color: var(--muted); }
+
+.badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+}
+.badge-gering { background: #2f855a; }
+.badge-mogelijk { background: #b7791f; }
+.badge-substantieel { background: #c05621; }
+.badge-hoog { background: #c53030; }
+.badge-zeer-hoog { background: #7b1d1d; }
