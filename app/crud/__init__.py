@@ -1,5 +1,5 @@
 """Data-toegangslaag (CRUD-operaties)."""
 
-from app.crud import rie
+from app.crud import incident, rie
 
-__all__ = ["rie"]
+__all__ = ["incident", "rie"]

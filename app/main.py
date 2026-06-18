@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from app import __version__
 from app.config import settings
 from app.database import Base, engine
-from app.routers import api, web
+from app.routers import api, incident_api, incident_web, web
 
 # Maak de databasetabellen aan bij het opstarten.
 # Voor productie is een migratietool (bv. Alembic) aan te raden.
@@ -20,7 +20,9 @@ _STATIC_DIR = Path(__file__).resolve().parent / "static"
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
 
 app.include_router(web.router)
+app.include_router(incident_web.router)
 app.include_router(api.router)
+app.include_router(incident_api.router)
 
 
 @app.get("/health", tags=["systeem"])

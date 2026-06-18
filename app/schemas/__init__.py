@@ -1,5 +1,6 @@
 """Pydantic-schema's voor request- en response-validatie."""
 
+from app.schemas.incident import IncidentCreate, IncidentRead
 from app.schemas.rie import (
     AssessmentCreate,
     AssessmentDetail,
@@ -16,4 +17,6 @@ __all__ = [
     "AssessmentUpdate",
     "HazardCreate",
     "HazardRead",
+    "IncidentCreate",
+    "IncidentRead",
 ]

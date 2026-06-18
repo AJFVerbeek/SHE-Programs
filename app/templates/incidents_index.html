@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Incidentenoverzicht{% endblock %}
+{% block content %}
+<h1>Incidentenoverzicht</h1>
+
+<section class="card">
+    <h2>Incident melden</h2>
+    <form method="post" action="/incidents" class="stack">
+        <label>Korte omschrijving (titel)
+            <input type="text" name="title" required maxlength="200">
+        </label>
+        <label>Toelichting
+            <textarea name="description" required rows="3"></textarea>
+        </label>
+        <label>Locatie / afdeling
+            <input type="text" name="location" required maxlength="200">
+        </label>
+        <div class="grid-3">
+            <label>Datum
+                <input type="date" name="occurred_on" required value="{{ today }}">
+            </label>
+            <label>Soort
+                <select name="incident_type" required>
+                    {% for t in types %}<option value="{{ t.value }}">{{ t.value }}</option>{% endfor %}
+                </select>
+            </label>
+            <label>Ernst
+                <select name="severity" required>
+                    {% for s in severities %}<option value="{{ s.value }}">{{ s.value }}</option>{% endfor %}
+                </select>
+            </label>
+        </div>
+        <button type="submit">Incident melden</button>
+    </form>
+</section>
+
+<section class="card">
+    <h2>Geregistreerde incidenten</h2>
+    {% if incidents %}
+    <table>
+        <thead>
+            <tr><th>Datum</th><th>Titel</th><th>Locatie</th><th>Soort</th><th>Ernst</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+        {% for i in incidents %}
+            <tr>
+                <td>{{ i.occurred_on.strftime("%d-%m-%Y") }}</td>
+                <td><a href="/incidents/{{ i.id }}">{{ i.title }}</a></td>
+                <td>{{ i.location }}</td>
+                <td>{{ i.incident_type.value }}</td>
+                <td>{{ i.severity.value }}</td>
+                <td><span class="status-{{ i.status.value | lower | replace(' ', '-') }}">{{ i.status.value }}</span></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="muted">Nog geen incidenten geregistreerd.</p>
+    {% endif %}
+</section>
+{% endblock %}

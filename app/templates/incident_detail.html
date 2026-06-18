@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ incident.title }}{% endblock %}
+{% block content %}
+<p><a href="/incidents">&larr; Terug naar incidenten</a></p>
+<h1>{{ incident.title }}</h1>
+<p class="muted">
+    Gemeld op {{ incident.reported_at.strftime("%d-%m-%Y %H:%M") }} &middot;
+    Status: <span class="status-{{ incident.status.value | lower | replace(' ', '-') }}">{{ incident.status.value }}</span>
+</p>
+
+<section class="card">
+    <h2>Gegevens bewerken</h2>
+    <form method="post" action="/incidents/{{ incident.id }}/edit" class="stack">
+        <label>Korte omschrijving (titel)
+            <input type="text" name="title" required maxlength="200" value="{{ incident.title }}">
+        </label>
+        <label>Toelichting
+            <textarea name="description" required rows="3">{{ incident.description }}</textarea>
+        </label>
+        <label>Locatie / afdeling
+            <input type="text" name="location" required maxlength="200" value="{{ incident.location }}">
+        </label>
+        <div class="grid-3">
+            <label>Datum
+                <input type="date" name="occurred_on" required value="{{ incident.occurred_on.isoformat() }}">
+            </label>
+            <label>Soort
+                <select name="incident_type" required>
+                    {% for t in types %}
+                    <option value="{{ t.value }}" {% if t == incident.incident_type %}selected{% endif %}>{{ t.value }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Ernst
+                <select name="severity" required>
+                    {% for s in severities %}
+                    <option value="{{ s.value }}" {% if s == incident.severity %}selected{% endif %}>{{ s.value }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+        <label>Status
+            <select name="status" required>
+                {% for st in statuses %}
+                <option value="{{ st.value }}" {% if st == incident.status %}selected{% endif %}>{{ st.value }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Corrigerende maatregel (optioneel)
+            <textarea name="corrective_action" rows="2">{{ incident.corrective_action or '' }}</textarea>
+        </label>
+        <button type="submit">Wijzigingen opslaan</button>
+    </form>
+</section>
+
+<section class="card">
+    <form method="post" action="/incidents/{{ incident.id }}/delete"
+          onsubmit="return confirm('Dit incident verwijderen?');">
+        <button type="submit" class="link-danger">Incident verwijderen</button>
+    </form>
+</section>
+{% endblock %}
