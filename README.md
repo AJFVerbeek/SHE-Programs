@@ -52,6 +52,14 @@ cp .env.example .env             # optioneel aanpassen
 
 ## Starten
 
+Snelste manier (maakt automatisch een venv aan, installeert en start):
+
+```bash
+./run.sh
+```
+
+Of handmatig:
+
 ```bash
 uvicorn app.main:app --reload
 ```
