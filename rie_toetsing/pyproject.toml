@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rie-toetsing"
+version = "0.1.0"
+description = "RI&E-toets-tool van AMM Consultancy: toetst een RI&E en Plan van Aanpak aan de toetsingscriteria (Stcrt. 2024 nr. 39674) en genereert een Toets- en adviesrapport."
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.40",
+    "python-docx>=1.1",
+    "python-dotenv>=1.0",
+]
+
+[project.scripts]
+rie-toets = "rie_toetsing.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["rie_toetsing*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
