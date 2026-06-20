@@ -104,6 +104,7 @@ Open `toetsrapport.docx` in Word. Je vindt er:
 | Eerst kijken zónder de API te gebruiken (leeg sjabloon) | `--dry-run` |
 | Branche-info automatisch laten opzoeken | `--branche-onderzoek --branche "43.99"` |
 | Het rapport als Markdown i.p.v. Word | `-o toetsrapport.md` |
+| Het AMM-sjabloon (logo, marges, voettekst) gebruiken | `--sjabloon AMM_...SJABLOON_v2.2.docx` |
 | BHV-plan en arbobeleid meenemen | `--bhv BHV.pdf --arbobeleid Beleid.pdf` |
 | Verdiepend onderzoek meenemen | `--verdiepend PSA.pdf` |
 | Alle opties zien | `rie-toets --help` |

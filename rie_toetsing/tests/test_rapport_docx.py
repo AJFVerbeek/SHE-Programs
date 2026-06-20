@@ -54,3 +54,39 @@ def test_render_docx_leeg_sjabloon(tmp_path):
     pad = tmp_path / "leeg.docx"
     render_docx({}, str(pad))
     assert pad.is_file()
+
+
+def _maak_sjabloon(pad, Cm):
+    """Bouw een testsjabloon met koptekst, voettekst, marge en oude inhoud."""
+    sjabloon = docx.Document()
+    sectie = sjabloon.sections[0]
+    sectie.left_margin = Cm(3)
+    sectie.header.paragraphs[0].text = "AMM CONSULTANCY B.V."
+    sectie.footer.paragraphs[0].text = "Vertrouwelijk — pagina"
+    sjabloon.add_paragraph("OUDE PLACEHOLDER-INHOUD die weg moet")
+    sjabloon.add_table(rows=1, cols=1)
+    sjabloon.save(str(pad))
+
+
+def test_render_docx_met_sjabloon_behoudt_huisstijl(tmp_path):
+    from docx.shared import Cm
+
+    sjabloon_pad = tmp_path / "sjabloon.docx"
+    _maak_sjabloon(sjabloon_pad, Cm)
+
+    uit = tmp_path / "rapport.docx"
+    render_docx(_data(), str(uit), sjabloon=str(sjabloon_pad))
+
+    document = docx.Document(str(uit))
+    eerste = document.sections[0]
+
+    # Huisstijl uit het sjabloon blijft behouden.
+    assert eerste.header.paragraphs[0].text == "AMM CONSULTANCY B.V."
+    assert "Vertrouwelijk" in eerste.footer.paragraphs[0].text
+    assert round(eerste.left_margin.cm) == 3
+
+    # Oude placeholder-inhoud is verdwenen, nieuwe inhoud staat erin.
+    body = "\n".join(p.text for p in document.paragraphs)
+    assert "OUDE PLACEHOLDER-INHOUD" not in body
+    assert "Toets- en adviesrapport" in body
+    assert "Voorbeeld B.V." in body

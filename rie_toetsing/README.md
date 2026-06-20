@@ -76,6 +76,18 @@ Belangrijkste opties: `--pva`, `--bhv`, `--arbobeleid`, `--verdiepend`
 Het formaat wordt afgeleid van de extensie van `--output`, of expliciet gekozen
 met `--format`.
 
+### Eigen Word-sjabloon (AMM-huisstijl)
+
+Geef met `--sjabloon` het vastgestelde AMM-`.docx`-sjabloon mee. De tool gebruikt
+dat als basis en behoudt **marges, koptekst, voettekst, logo en paginanummering**;
+alleen de inhoud wordt vervangen door het gegenereerde toetsrapport.
+
+```bash
+rie-toets RIE.pdf --pva PvA.pdf --org "Voorbeeld B.V." \
+    --sjabloon AMM_Toets-en-adviesrapport_RIE_SJABLOON_v2.2.docx \
+    -o toetsrapport.docx
+```
+
 ## Tests
 
 ```bash

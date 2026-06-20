@@ -68,6 +68,20 @@ def _set_font(run, Pt, RGBColor, *, size=FONT_TEKST_PT, bold=False, kleur=None, 
         run.font.color.rgb = RGBColor.from_string(kleur)
 
 
+def _leeg_body(doc, qn) -> None:
+    """Verwijder de bestaande inhoud uit een sjabloon, behoud de sectie-instellingen.
+
+    De body-level ``w:sectPr`` (met marges, paginaformaat en verwijzingen naar
+    kop-/voettekst, inclusief het logo) blijft staan, zodat de huisstijl van het
+    sjabloon behouden blijft. Alleen alinea's en tabellen worden verwijderd.
+    """
+    body = doc.element.body
+    for child in list(body):
+        if child.tag == qn("w:sectPr"):
+            continue
+        body.remove(child)
+
+
 def _landscape(section, WD_ORIENT) -> None:
     """Zet een sectie op liggend (A4)."""
     section.orientation = WD_ORIENT.LANDSCAPE
@@ -125,8 +139,21 @@ def _alinea(doc, tekst: str, Pt, RGBColor, *, bold=False) -> None:
     _set_font(run, Pt, RGBColor, bold=bold)
 
 
-def render_docx(data: dict[str, Any], pad: str, *, toetsingsdatum: str | None = None) -> None:
-    """Schrijf het Toets- en adviesrapport als .docx-bestand naar ``pad``."""
+def render_docx(
+    data: dict[str, Any],
+    pad: str,
+    *,
+    toetsingsdatum: str | None = None,
+    sjabloon: str | None = None,
+) -> None:
+    """Schrijf het Toets- en adviesrapport als .docx-bestand naar ``pad``.
+
+    Args:
+        sjabloon: optioneel pad naar een bestaand .docx-sjabloon (bijv. het
+            vastgestelde AMM-sjabloon). De inhoud daarvan wordt vervangen, maar
+            de huisstijl — marges, kop-/voettekst, logo en paginanummering —
+            blijft behouden.
+    """
     helpers = _imports()
     docx, WD_ORIENT, WD_SECTION, OxmlElement, qn, Pt, RGBColor = helpers
 
@@ -135,7 +162,11 @@ def render_docx(data: dict[str, Any], pad: str, *, toetsingsdatum: str | None = 
     org = profiel.get("organisatienaam") or _GEEN
     datum = toetsingsdatum or profiel.get("toetsingsdatum") or date.today().isoformat()
 
-    doc = docx.Document()
+    if sjabloon:
+        doc = docx.Document(sjabloon)
+        _leeg_body(doc, qn)
+    else:
+        doc = docx.Document()
     normaal = doc.styles["Normal"].font
     normaal.name = FONT
     normaal.size = Pt(FONT_TEKST_PT)

@@ -48,6 +48,10 @@ def _bouw_parser() -> argparse.ArgumentParser:
     parser.add_argument("--format", choices=["md", "docx"], default=None,
                         help="Uitvoerformaat. Standaard afgeleid van de "
                         "bestandsextensie van --output (anders 'md').")
+    parser.add_argument("--sjabloon", default=None, metavar="PAD",
+                        help="Pad naar een bestaand .docx-sjabloon (bijv. het AMM-"
+                        "sjabloon). Behoudt marges, kop-/voettekst en logo. "
+                        "Alleen voor docx-uitvoer.")
     parser.add_argument("--dry-run", action="store_true",
                         help="Lees alleen de documenten in en genereer een leeg sjabloon "
                         "(geen API-aanroep).")
@@ -79,14 +83,14 @@ def _bepaal_formaat(args: argparse.Namespace) -> str:
     return "md"
 
 
-def _schrijf(data: dict, output: str | None, formaat: str) -> None:
+def _schrijf(data: dict, output: str | None, formaat: str, sjabloon: str | None = None) -> None:
     if formaat == "docx":
         if not output:
             print("Voor --format docx is --output vereist.", file=sys.stderr)
             raise SystemExit(1)
         from .rapport_docx import render_docx
 
-        render_docx(data, output)
+        render_docx(data, output, sjabloon=sjabloon)
         print(f"Rapport geschreven naar: {output}", file=sys.stderr)
         return
 
@@ -115,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.dry_run:
         print("Dry run: leeg sjabloon zonder API-aanroep.", file=sys.stderr)
         data = {"organisatieprofiel": {"organisatienaam": args.org}}
-        _schrijf(data, args.output, formaat)
+        _schrijf(data, args.output, formaat, args.sjabloon)
         return 0
 
     # Lazy import: de SDK is alleen nodig voor een echte toetsing.
@@ -148,7 +152,7 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
 
-    _schrijf(data, args.output, formaat)
+    _schrijf(data, args.output, formaat, args.sjabloon)
     return 0
 
 
