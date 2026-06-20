@@ -31,6 +31,9 @@ in het sjabloon voorgeschreven samenvoegingen.
    RAG-codering (🟢 Ja · 🟠 Deels · 🔴 Nee · ⚪ n.v.t.).
 4. Optioneel **branche-onderzoek** via web search vooraf (`--branche-onderzoek`).
 
+> 📖 Een stap-voor-stap uitleg (ook zonder programmeerkennis) staat in
+> [HANDLEIDING.md](HANDLEIDING.md).
+
 ## Installatie
 
 ```bash
