@@ -45,6 +45,9 @@ def _bouw_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model", default=None, help="Te gebruiken Claude-model.")
     parser.add_argument("--output", "-o", default=None, metavar="PAD",
                         help="Schrijf het rapport naar dit bestand (anders stdout).")
+    parser.add_argument("--format", choices=["md", "docx"], default=None,
+                        help="Uitvoerformaat. Standaard afgeleid van de "
+                        "bestandsextensie van --output (anders 'md').")
     parser.add_argument("--dry-run", action="store_true",
                         help="Lees alleen de documenten in en genereer een leeg sjabloon "
                         "(geen API-aanroep).")
@@ -67,7 +70,27 @@ def _laad_alles(args: argparse.Namespace) -> list:
     return documenten
 
 
-def _schrijf(rapport: str, output: str | None) -> None:
+def _bepaal_formaat(args: argparse.Namespace) -> str:
+    """Leid het uitvoerformaat af uit --format of de bestandsextensie."""
+    if args.format:
+        return args.format
+    if args.output and Path(args.output).suffix.lower() == ".docx":
+        return "docx"
+    return "md"
+
+
+def _schrijf(data: dict, output: str | None, formaat: str) -> None:
+    if formaat == "docx":
+        if not output:
+            print("Voor --format docx is --output vereist.", file=sys.stderr)
+            raise SystemExit(1)
+        from .rapport_docx import render_docx
+
+        render_docx(data, output)
+        print(f"Rapport geschreven naar: {output}", file=sys.stderr)
+        return
+
+    rapport = render(data)
     if output:
         Path(output).write_text(rapport, encoding="utf-8")
         print(f"Rapport geschreven naar: {output}", file=sys.stderr)
@@ -87,10 +110,12 @@ def main(argv: list[str] | None = None) -> int:
     bestandsnamen = ", ".join(f"{d.label}: {d.bestandsnaam}" for d in documenten)
     print(f"Ingelezen documenten: {bestandsnamen}", file=sys.stderr)
 
+    formaat = _bepaal_formaat(args)
+
     if args.dry_run:
         print("Dry run: leeg sjabloon zonder API-aanroep.", file=sys.stderr)
         data = {"organisatieprofiel": {"organisatienaam": args.org}}
-        _schrijf(render(data), args.output)
+        _schrijf(data, args.output, formaat)
         return 0
 
     # Lazy import: de SDK is alleen nodig voor een echte toetsing.
@@ -123,7 +148,7 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
 
-    _schrijf(render(data), args.output)
+    _schrijf(data, args.output, formaat)
     return 0
 
 

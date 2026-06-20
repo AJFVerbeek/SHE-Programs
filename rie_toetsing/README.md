@@ -43,21 +43,35 @@ cp .env.example .env               # vul ANTHROPIC_API_KEY in
 ## Gebruik
 
 ```bash
-# Volledige toetsing met rapport
+# Volledige toetsing, rapport als Markdown
 rie-toets RIE.pdf --pva PlanVanAanpak.pdf --org "Voorbeeld B.V." \
     --output toetsrapport.md
 
+# Rapport als Word-document in AMM-huisstijl (.docx → automatisch docx)
+rie-toets RIE.pdf --pva PlanVanAanpak.pdf --org "Voorbeeld B.V." \
+    --output toetsrapport.docx
+
 # Met branche-onderzoek vooraf
 rie-toets RIE.pdf --pva PvA.pdf --org "Voorbeeld B.V." --branche "43.99" \
-    --branche-onderzoek -o rapport.md
+    --branche-onderzoek -o rapport.docx
 
 # Leeg sjabloon zonder API-aanroep
-rie-toets RIE.pdf --dry-run -o sjabloon.md
+rie-toets RIE.pdf --dry-run -o sjabloon.docx
 ```
 
 Belangrijkste opties: `--pva`, `--bhv`, `--arbobeleid`, `--verdiepend`
 (allemaal herhaalbaar), `--org`, `--branche`, `--branche-onderzoek`,
-`--model`, `--output/-o`, `--dry-run`.
+`--model`, `--output/-o`, `--format {md,docx}`, `--dry-run`.
+
+### Uitvoerformaat
+
+- **Markdown** (`.md`, standaard) — snel te lezen en te versioneren.
+- **Word** (`.docx`) — in de AMM-huisstijl: primair blauw `#5467B0`, Aptos,
+  voorpagina en samenvatting staand, tabelpagina's liggend, en RAG-gekleurde
+  oordeelcellen (🟢 Ja · 🟠 Deels · 🔴 Nee · ⚪ n.v.t.) met een wit vinkje.
+
+Het formaat wordt afgeleid van de extensie van `--output`, of expliciet gekozen
+met `--format`.
 
 ## Tests
 
