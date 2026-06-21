@@ -7,6 +7,11 @@ daarna is een RI&E toetsen telkens één commando.
 
 ## Deel A — Eenmalig instellen
 
+> **Windows-snelstart:** dubbelklik op `start.bat` in de map `rie_toetsing`. Dat
+> doet stap 3 t/m 5 automatisch (installeren, activeren, API-sleutel uit `.env`
+> laden) en laat een venster achter waarin je direct `rie-toets ...` kunt typen.
+> De stappen hieronder zijn de handmatige variant.
+
 ### 1. Python controleren
 
 Open een terminal (macOS: *Terminal*, Windows: *PowerShell*) en typ:
