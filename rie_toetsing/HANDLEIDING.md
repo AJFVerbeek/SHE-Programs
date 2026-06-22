@@ -7,6 +7,16 @@ daarna is een RI&E toetsen telkens één commando.
 
 ## Deel A — Eenmalig instellen
 
+> **Windows-snelstart:**
+> - **Helemaal begeleid:** dubbelklik op `Toets-RIE.bat`. Het script vraagt om
+>   je RI&E-bestand, het Plan van Aanpak en de organisatienaam, en voert daarna
+>   zelf de toetsing uit — je hoeft geen commando's te typen.
+> - **Klaar venster:** dubbelklik op `start.bat` als je wél zelf commando's wilt
+>   typen. Dat installeert en activeert alles en laat een venster achter waarin
+>   je direct `rie-toets ...` kunt typen.
+>
+> De stappen hieronder zijn de handmatige variant.
+
 ### 1. Python controleren
 
 Open een terminal (macOS: *Terminal*, Windows: *PowerShell*) en typ:
