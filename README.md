@@ -68,6 +68,23 @@ uvicorn app.main:app --reload
 - API-documentatie (Swagger): <http://127.0.0.1:8000/docs>
 - Health-check: <http://127.0.0.1:8000/health>
 
+## Draaien met Docker
+
+Zonder lokale Python-installatie, met persistente database:
+
+```bash
+docker compose up --build
+```
+
+Of alleen de image bouwen en draaien:
+
+```bash
+docker build -t she-programs .
+docker run -p 8000:8000 she-programs
+```
+
+De app is daarna bereikbaar op <http://127.0.0.1:8000/>.
+
 ## Tests
 
 ```bash

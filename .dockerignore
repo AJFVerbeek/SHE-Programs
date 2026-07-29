@@ -1,0 +1,28 @@
+# Versiebeheer
+.git
+.gitignore
+
+# Virtuele omgevingen
+.venv
+venv
+env
+
+# Python-cache
+__pycache__
+*.py[cod]
+*.egg-info
+
+# Tests en tooling
+tests
+pytest.ini
+.pytest_cache
+.coverage
+
+# Lokale database en secrets
+*.db
+*.sqlite3
+.env
+
+# Documentatie/overig
+README.md
+run.sh

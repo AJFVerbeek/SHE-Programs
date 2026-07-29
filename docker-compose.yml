@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Sla de SQLite-database op in een persistent volume.
+      DATABASE_URL: "sqlite:////data/she_rie.db"
+    volumes:
+      - she-data:/data
+
+volumes:
+  she-data:
